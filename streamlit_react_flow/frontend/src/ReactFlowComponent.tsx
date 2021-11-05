@@ -16,7 +16,7 @@ interface State {
  * This is a React-based component template. The `render()` function is called
  * automatically when your component should be re-rendered.
  */
-class MyComponent extends StreamlitComponentBase<State> {
+class ReactFlowComponent extends StreamlitComponentBase<State> {
   public state = { numClicks: 0, isFocused: false }
 
   public render = (): ReactNode => {
