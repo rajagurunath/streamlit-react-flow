@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="streamlit-react-flow",
-    version="0.0.1",
+    version="0.0.3",
     author="Gurunath",
     author_email="gurunathrajagopal@gmail.com",
     description="A Wrapper around React-flow component",

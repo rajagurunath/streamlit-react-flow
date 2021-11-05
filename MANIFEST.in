@@ -1,1 +1,1 @@
-recursive-include react_flow/frontend/build *
+recursive-include streamlit_react_flow/frontend/build *
