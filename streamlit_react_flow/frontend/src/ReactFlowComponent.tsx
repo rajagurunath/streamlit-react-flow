@@ -5,6 +5,8 @@ import {
 } from "streamlit-component-lib"
 import React, { ReactNode,useState } from "react";
 import ReactFlow,{Controls,updateEdge,addEdge} from "react-flow-renderer"
+import SideBar from "./sidebar"
+import DragandDropComponent from "./DragandDropComponent"
 
 
 interface State {
@@ -25,6 +27,8 @@ class ReactFlowComponent extends StreamlitComponentBase<State> {
     const name = this.props.args["name"]
     const elements = this.props.args['elements']
     const flowStyles = this.props.args['flowStyles']
+    const componentName = this.props.args['component_name']
+    const withControls = this.props.args['withControls']
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
     // streamlit app.
@@ -43,54 +47,27 @@ class ReactFlowComponent extends StreamlitComponentBase<State> {
       style.outline = borderStyling
     }
 
-    
-    // const BasicFlow = () => <ReactFlow elements={elements} style={flowStyles} />;
-    
+  if (componentName == "SimpleReactFlow"){
+    if (withControls ==true){
+      return (
+        <ReactFlow elements={elements}
+               style={flowStyles} snapToGrid={true}> <Controls/></ReactFlow >)
 
-    // Show a button and some text.
-    // When the button is clicked, we'll increment our "numClicks" state
-    // variable, and send its new value back to Streamlit, where it'll
-    // be available to the Python program.
-  //   return (
-  //     <span>
-  //       Guru, {name}! &nbsp;
-  //       <button
-  //         style={style}
-  //         onClick={this.onClicked}
-  //         disabled={this.props.disabled}
-  //         onFocus={this._onFocus}
-  //         onBlur={this._onBlur}
-  //       >
-  //         Click Me!
-  //       </button>
-  //     </span>
-  //   )
-  // }
+    }
+    else{
+      return (
+        <ReactFlow elements={elements}
+               style={flowStyles} snapToGrid={true}> </ReactFlow >)
+    }
 
-  return (<ReactFlow elements={elements}
-                 style={flowStyles}/>)};
-
-  /** Click handler for our "Click Me!" button. */
-  private onClicked = (): void => {
-    // Increment state.numClicks, and pass the new value back to
-    // Streamlit via `Streamlit.setComponentValue`.
-    this.setState(
-      prevState => ({ numClicks: prevState.numClicks + 1 }),
-      () => Streamlit.setComponentValue(this.state.numClicks)
-    )
   }
-  
-
-  
-  /** Focus handler for our "Click Me!" button. */
-  private _onFocus = (): void => {
-    this.setState({ isFocused: true })
+  // TODO: complete the Drag and drop component
+  else{
+    return <div>
+      <DragandDropComponent/>
+    </div>
   }
-
-  /** Blur handler for our "Click Me!" button. */
-  private _onBlur = (): void => {
-    this.setState({ isFocused: false })
-  }
+  };
 }
 
 // "withStreamlitConnection" is a wrapper function. It bootstraps the

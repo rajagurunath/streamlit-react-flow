@@ -19,7 +19,7 @@ st.title("React-Flow Test")
 st.subheader("Friends Graph")
 
 elements = [
-    { "id": '1', "data": { "label": 'RajaGuru' }, "type":"input","style": { "background": '#ffcc50', "width": 100 },
+    { "id": '1', "data": { "label": 'Guru' }, "type":"input","style": { "background": '#ffcc50', "width": 100 },
         "position": { "x": 100, "y": 100 } },
     { "id": '2', "data": { "label": 'Achyuth' },"position": { "x": 300, "y": 100 }},
     { "id": 'e1-2', "source": '1', "target": '2', "animated": True },
@@ -35,3 +35,6 @@ react_flow("friends",elements=elements,flow_styles=flowStyles)
 
 ```
 
+### The above example produces following graph
+
+![](friends_graph.png)

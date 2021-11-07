@@ -1,4 +1,5 @@
 import os
+
 import streamlit.components.v1 as components
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
@@ -43,8 +44,8 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def react_flow(name, elements = {} ,flow_styles = {},key=None):
-    """Create a new instance of "react_flow".
+def simple_react_flow(name, elements={}, flow_styles={}, with_controls=False, key=None):
+    """Create a new instance of "React flow graph" using the elements dictionary.
 
     Parameters
     ----------
@@ -52,7 +53,49 @@ def react_flow(name, elements = {} ,flow_styles = {},key=None):
         The name of the thing we're saying hello to. The component will display
         the text "Hello, {name}!"
     elements: dict
-        nodes and edges 
+        nodes and edges
+    flow_styles: dict
+        flow properties
+    key: str or None
+        An optional key that uniquely identifies this component. If this is
+        None, and the component's arguments are changed, the component will
+        be re-mounted in the Streamlit frontend and lose its current state.
+
+    Returns
+    -------
+        None
+    """
+    # Call through to our private component function. Arguments we pass here
+    # will be sent to the frontend, where they'll be available in an "args"
+    # dictionary.
+    #
+    # "default" is a special argument that specifies the initial return
+    # value of the component before the user has interacted with it.
+    component_value = _react_flow_func(
+        name=name,
+        elements=elements,
+        flowStyles=flow_styles,
+        key=key,
+        default=0,
+        withControls=with_controls,
+        component_name="SimpleReactFlow",
+    )
+
+    # We could modify the value returned from the component if we wanted.
+    # There's no need to do this in our simple example - but it's an option.
+    return component_value
+
+
+def drag_and_drop_flow(name, elements={}, flow_styles={}, key=None):
+    """Create a new instance of "Drag and drop component".
+
+    Parameters
+    ----------
+    name: str
+        The name of the thing we're saying hello to. The component will display
+        the text "Hello, {name}!"
+    elements: dict
+        nodes and edges
     flow_styles: dict
         flow properties
     key: str or None
@@ -71,10 +114,14 @@ def react_flow(name, elements = {} ,flow_styles = {},key=None):
     #
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
-    component_value = _react_flow_func(name=name,
-                            elements= elements,
-                            flowStyles= flow_styles,
-                            key=key, default=0)
+    component_value = _react_flow_func(
+        name=name,
+        elements=elements,
+        flowStyles=flow_styles,
+        key=key,
+        default=0,
+        component_name="DragandDropComponent",
+    )
 
     # We could modify the value returned from the component if we wanted.
     # There's no need to do this in our simple example - but it's an option.
@@ -84,7 +131,7 @@ def react_flow(name, elements = {} ,flow_styles = {},key=None):
 # Add some test code to play with the component while it's in development.
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run react_flow/__init__.py`
-if not  _RELEASE:
+if not _RELEASE:
     # testing
     import streamlit as st
 
@@ -93,26 +140,63 @@ if not  _RELEASE:
     st.subheader("Friends Graph")
 
     elements = [
-      { "id": '1', "data": { "label": 'Guru' }, "type":"input","style": { "background": '#ffcc50', "width": 100 },
-            "position": { "x": 100, "y": 100 } },
-      { "id": '2', "data": { "label": 'Indu' },"position": { "x": 300, "y": 100 }},
-      { "id": 'e1-2', "source": '1', "target": '2', "animated": True },
+        {
+            "id": "1",
+            "data": {"label": "Guru"},
+            "type": "input",
+            "style": {"background": "#ffcc50", "width": 100},
+            "position": {"x": 100, "y": 100},
+        },
+        {"id": "2", "data": {"label": "Achyuth"}, "position": {"x": 300, "y": 100}},
+        {"id": "e1-2", "source": "1", "target": "2", "animated": True},
     ]
-    
-    elements.extend([{"id":i+3,"data":{"label":name },"type":"output","position": { "x": 170*i, "y": 300+i }} for i,name in enumerate(["Aravind","Manoj","Velmurugan","sridhar"])])
-    elements.extend([{"id":f"e{i}-{j}","source":i,"target":j} for i,j in [(1,3),(1,4),(1,5),(1,6)]])
-    flowStyles = { "height": 500,"width":1100 }
+
+    elements.extend(
+        [
+            {
+                "id": i + 3,
+                "data": {"label": name},
+                "type": "output",
+                "position": {"x": 170 * i, "y": 300 + i},
+            }
+            for i, name in enumerate(["Aravind", "Manoj", "Velmurugan", "sridhar"])
+        ]
+    )
+    elements.extend(
+        [
+            {"id": f"e{i}-{j}", "source": i, "target": j}
+            for i, j in [(1, 3), (1, 4), (1, 5), (1, 6)]
+        ]
+    )
+    flowStyles = {"height": 500, "width": 1100}
 
     # Create an instance of our component with a constant `name` arg, and
     # print its output value.
-    react_flow("friends",elements=elements,flow_styles=flowStyles)
+    simple_react_flow(
+        "friends", elements=elements, flow_styles=flowStyles, with_controls=True
+    )
 
     st.subheader("Dask-sql Plan")
 
-    plan = 'LogicalProject(monthh=[CAST(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0)))):INTEGER], yearr=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 12)):INTEGER])\n  LogicalTableScan(table=[[root, test]])\n'
-    plan = plan.strip("\n")# 'LogicalProject(ms=[*(CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 1000)):INTEGER, 1000000)], sec=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 1000)):INTEGER], minn=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 60000)):INTEGER], hr=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 3600000)):INTEGER], dayy=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 86400000)):INTEGER])\n  LogicalTableScan(table=[[root, test]])'
+    plan = "LogicalProject(monthh=[CAST(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0)))):INTEGER], yearr=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 12)):INTEGER])\n  LogicalTableScan(table=[[root, test]])\n"
+    plan = plan.strip(
+        "\n"
+    )  # 'LogicalProject(ms=[*(CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 1000)):INTEGER, 1000000)], sec=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 1000)):INTEGER], minn=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 60000)):INTEGER], hr=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 3600000)):INTEGER], dayy=[CAST(/INT(Reinterpret(-(CAST($0):TIMESTAMP(0), CAST($1):TIMESTAMP(0))), 86400000)):INTEGER])\n  LogicalTableScan(table=[[root, test]])'
     subplans = plan.split("\n")[::-1]
-    plan_elements = [{"id":f"{i}","data":{"label":text},"style":{"background": '#62c1f0',"width": 300,},"position": { "x": 100, "y": 100+i*100 }} for i,text in enumerate(subplans)]
-    plan_edges= [{"id":f"conn{i}_{1+1}","source":i,"target":i+1} for i in range(len(subplans)-1) ]
+    plan_elements = [
+        {
+            "id": f"{i}",
+            "data": {"label": text},
+            "style": {"background": "#62c1f0", "width": 300,},
+            "position": {"x": 100, "y": 100 + i * 100},
+        }
+        for i, text in enumerate(subplans)
+    ]
+    plan_edges = [
+        {"id": f"conn{i}_{1+1}", "source": i, "target": i + 1}
+        for i in range(len(subplans) - 1)
+    ]
     plan_elements.extend(plan_edges)
-    react_flow("dask-sql",elements=plan_elements,flow_styles=flowStyles)
+    simple_react_flow("dask-sql", elements=plan_elements, flow_styles=flowStyles)
+
+    drag_and_drop_flow("dask-sql", elements=plan_elements, flow_styles=flowStyles)
